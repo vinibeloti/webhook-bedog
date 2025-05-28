@@ -2,13 +2,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "principal" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "principal" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -27,4 +26,3 @@ jobs:
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         WASCRIPT_TOKEN: ${{ secrets.WASCRIPT_TOKEN }}
-
