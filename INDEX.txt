@@ -1,0 +1,62 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const axios = require('axios');
+const { Configuration, OpenAIApi } = require('openai');
+
+const app = express();
+app.use(bodyParser.json()); // Middleware para interpretar JSON
+
+// ?? CONFIGURAÇÕES IMPORTANTES
+const openai = new OpenAIApi(new Configuration({
+  apiKey: process.env.OPENAI_API_KEY // Chave da OpenAI vinda do Secrets
+}));
+
+const WASCRIPT_TOKEN = process.env.WASCRIPT_TOKEN; // Token do Wascript também no Secrets
+const WASCRIPT_API_BASE = 'https://api-whatsapp.wascript.com.br';
+
+// ? Endpoint do webhook - RECEBER MENSAGENS
+app.post('/webhook', async (req, res) => {
+  try {
+    const { numero, mensagem } = req.body;
+    console.log(`?? Mensagem recebida de ${numero}: ${mensagem}`);
+
+    // ?? Consulta ao GPT
+    const gptResponse = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: mensagem }]
+    });
+
+    const resposta = gptResponse.data.choices[0].message.content;
+    console.log(`?? Resposta do GPT: ${resposta}`);
+
+    // ? Enviar resposta via Wascript
+    const sendResponse = await axios({
+      method: 'post',
+      url: `${WASCRIPT_API_BASE}/api/enviar-texto/${WASCRIPT_TOKEN}`,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': WASCRIPT_TOKEN
+      },
+      data: {
+        phone: numero,
+        message: resposta
+      }
+    });
+
+    console.log(`? Mensagem enviada: ${sendResponse.data}`);
+    res.status(200).json({ success: true, resposta });
+  } catch (error) {
+    console.error('? Erro ao processar a mensagem:', error.response?.data || error.message);
+    res.status(500).json({ success: false, error: error.response?.data || error.message });
+  }
+});
+
+// ?? Rota de teste
+app.get('/', (req, res) => {
+  res.send('? NALA - Webhook da BEDOG ativo!');
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`?? NALA rodando na porta ${PORT}`);
+});
