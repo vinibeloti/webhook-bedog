@@ -27,3 +27,4 @@ jobs:
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         WASCRIPT_TOKEN: ${{ secrets.WASCRIPT_TOKEN }}
+
