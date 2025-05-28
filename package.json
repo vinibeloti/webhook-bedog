@@ -1,7 +1,7 @@
 {
   "name": "webhook-bedog",
   "version": "1.0.0",
-  "description": "Automação de webhook da BDOG com OpenAI e Wascript",
+  "description": "Automação de webhook da BEDOG com OpenAI e Wascript",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
